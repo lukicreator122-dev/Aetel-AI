@@ -15,10 +15,23 @@ jobs:
         with:
           node-version: 24.22.3
 
-      - run: npm install
-      - run: npm run frontend
+      - name: Extrair projeto
+        run: |
+          unzip -q "$(find . -maxdepth 1 -iname 'LibreChat-main*.zip' | head -n1)" -d build
+          if [ -f aetel-changes.zip ]; then
+            unzip -q -o aetel-changes.zip -x '.env' -d build/LibreChat-main
+          fi
+          ls build/LibreChat-main | head
+
+      - name: Instalar dependências
+        working-directory: build/LibreChat-main
+        run: npm ci
+
+      - name: Compilar frontend
+        working-directory: build/LibreChat-main
+        run: npm run frontend
 
       - uses: actions/upload-artifact@v4
         with:
           name: aetel-frontend-dist
-          path: client/dist
+          path: build/LibreChat-main/client/dist
